@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <!-- Mobile-friendly -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Broseph's Armory</title>
+
+    <link 
+      rel="icon" 
+      href="https://suvanbanerjee.github.io/sba-faq/_next/static/media/logo.c983c34b.png"
+      type="image/png"
+    >
+
+    <style>
+      /*
+        Color Palette & Layout:
+        #F39117, #28306F, #FFFFFF, #363020, #605C4E
+      */
+
+      /* Reset / Global */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html {
+        font-size: 16px; 
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #FFFFFF;
+        color: #605C4E; 
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Header => Centered with logo & icon */
+      header {
+        background-color: #F39117;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .site-logo {
+        height: 60px;
+        margin-bottom: 10px;
+      }
+      header h1 {
+        color: #363020;
+        font-size: 1.8rem;
+        text-align: center;
+      }
+
+      /* Main => center content, responsive container */
+      main {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 900px;
+        margin: 0 auto; 
+        width: 100%;
+      }
+
+      .search-container {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      label {
+        display: inline-block;
+        width: 100%;
+        font-weight: bold;
+        margin: 8px 0 4px 0;
+        font-size: 1rem; 
+      }
+      input[type="text"],
+      select {
+        width: 100%;
+        color: #363020;
+        font-size: 1rem;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        margin-bottom: 16px;
+      }
+
+      .form-group {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        position: relative;  /* So we can position the suggestion box absolutely */
+      }
+
+      /* Buttons => border-radius, color transitions */
+      button {
+        border: none;
+        border-radius: 28px;
+        background-color: #F39117;
+        color: #FFFFFF;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 10px 20px;
+        margin-top: 8px;
+      }
+      button:hover {
+        background-color: #28306F;
+      }
+
+      /* Table => center, responsive */
+      #resultsDiv {
+        width: 100%;
+        margin-top: 20px;
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+        font-size: 1rem;
+      }
+      th {
+        background-color: #f2f2f2;
+        color: #363020;
+      }
+
+      /* Footer => #28306F, center text */
+      footer {
+        background-color: #28306F;
+        padding: 10px 20px;
+        text-align: center;
+      }
+      footer p {
+        color: #FFFFFF;
+      }
+
+      /* Additional Mobile Tweaks */
+      @media (max-width: 600px) {
+        html {
+          font-size: 18px; 
+        }
+        header h1 {
+          font-size: 1.6rem;
+        }
+        .site-logo {
+          height: 50px;
+        }
+      }
+
+      /* Custom suggestion box styling */
+      .suggestion-box {
+        position: absolute;
+        top: 70px; /* or so, depends on input height. We can also compute this dynamically */
+        width: 100%;
+        background-color: #FFFFFF;
+        border: 1px solid #ccc;
+        border-radius: 0 0 8px 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 999; 
+        display: none; /* hidden by default */
+      }
+      .suggestion-box ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+      }
+      .suggestion-box li {
+        padding: 8px;
+        border-bottom: 1px solid #eee;
+        font-size: 1rem;
+        color: #605C4E;
+        cursor: pointer;
+      }
+      .suggestion-box li:hover {
+        background-color: #f2f2f2;
+      }
+    </style>
+  </head>
+
+  <body onload="initPage()">
+    <header>
+      <img 
+        class="site-logo"
+        src="https://suvanbanerjee.github.io/sba-faq/_next/static/media/logo.c983c34b.png"
+        alt="Site Logo"
+      >
+      <h1>Armory</h1>
+    </header>
+
+    <main>
+        <p style="text-align: center; max-width: 600px;">
+            Welcome to the Armory! Here, you can quickly find the books you’re looking for by entering details such as category,
+            title, author name, ISBN, or a keyword from the description. Simply type in as much (or as little) information as you know in the relevant
+            fields and click on the Search button. You’ll then see a list of matching results, along with key details for each title. 
+            <br/><br/>
+            If you’d like to learn more about a particular book, just click the More button to reveal extra information. 
+            Use these tools to locate, compare, and pick the perfect book for your reading needs. Enjoy exploring!
+        </p>
+
+      <div class="search-container">
+        <!-- Category dropdown -->
+        <div class="form-group">
+          <label for="category">Category:</label>
+          <select id="category">
+            <option value="">(Select)</option>
+          </select>
+        </div>
+
+        <!-- Book Name: no list attribute, we create our own suggestion box below -->
+        <div class="form-group">
+          <label for="bookName">Book Name:</label>
+          <input type="text" id="bookName">
+          <!-- custom suggestion box for BookName -->
+          <div class="suggestion-box" id="bookNameSuggestions">
+            <ul></ul>
+          </div>
+        </div>
+
+        <!-- Author -->
+        <div class="form-group">
+          <label for="author">Author:</label>
+          <input type="text" id="author">
+          <!-- custom suggestion box for Author -->
+          <div class="suggestion-box" id="authorSuggestions">
+            <ul></ul>
+          </div>
+        </div>
+
+        <!-- ISBN -->
+        <div class="form-group">
+          <label for="isbn">ISBN:</label>
+          <input type="text" id="isbn">
+          <!-- custom suggestion box for ISBN -->
+          <div class="suggestion-box" id="isbnSuggestions">
+            <ul></ul>
+          </div>
+        </div>
+
+        <!-- Keywords -->
+        <div class="form-group">
+          <label for="keywords">Keywords:</label>
+          <input type="text" id="keywords">
+        </div>
+
+        <button class="search-button" onclick="performSearch()">Search</button>
+      </div>
+
+      <!-- Results -->
+      <div id="resultsDiv"></div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Broseph Foundation</p>
+    </footer>
+
+    <!-- Include our custom auto-complete logic in client.js -->
+    <script src="client.js"></script>
+  </body>
+</html>
